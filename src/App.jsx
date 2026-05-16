@@ -7,7 +7,7 @@ import SignUp from "./pages/SignUp";
 import FamilyPage from "./pages/FamilyPage";
 import Mypage from "./pages/Mypage";
 import RiskDetails from "./pages/RiskDetails";
-
+import SignupCss from "./pages/signup.css"
 import GlobalStyle from "./style/Globalstyle";
 import "./App.css";
 
@@ -24,6 +24,7 @@ function App() {
           <Route path="/family" element={<FamilyPage />} />
           <Route path="/mypage" element={<Mypage />} />
           <Route path="/risk-details" element={<RiskDetails />} />
+          <Route path="/signup" element={<SignupCss />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </MobileContainer>
