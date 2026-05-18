@@ -78,7 +78,7 @@ const GlobalStyle = createGlobalStyle`
 
   body {
   font-family: "Pretendard", sans-serif;
-  background-color: #f2f3f5;
+  background-color: #2a2a2a;
   color: var(--color-black, #111111);
   overflow-x: hidden;
 }
