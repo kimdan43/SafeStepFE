@@ -1,188 +1,152 @@
-import { useState } from "react";
-import styled from "styled-components";
-import { BiLogIn, BiMap, BiUserCircle } from "react-icons/bi";
-
-
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
+import AppHeader from '../components/Main/AppHeader';
+import BottomNavigation from '../components/Main/BottomNavigation';
+import { apiLogin } from '../api/api';
 
 function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    if (email === "test@test.com" && password === "1234") {
-      alert("로그인 성공!");
-    } else {
-      alert("이메일 또는 비밀번호가 일치하지 않습니다");
+  const handleLogin = async () => {
+    if (!email || !password) {
+      alert('이메일과 비밀번호를 입력해 주세요');
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await apiLogin(email, password);
+      if (res?.data?.accessToken) {
+        localStorage.setItem('accessToken', res.data.accessToken);
+        localStorage.setItem('refreshToken', res.data.refreshToken || '');
+        localStorage.setItem('userType', res.data.userType || '');
+        navigate('/');
+      } else {
+        alert(res?.message || '이메일 또는 비밀번호가 일치하지 않습니다');
+      }
+    } catch {
+      alert('서버 오류가 발생했습니다');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <Phone>
-      <TopBar>
-        <BackButton>←</BackButton>
-        <Logo>SafeStep AI</Logo>
-      </TopBar>
-
-      <LoginPage>
+    <PageWrapper>
+      <AppHeader showBack />
+      <Content>
         <LoginBox>
           <LoginTitle>로그인</LoginTitle>
-
           <Label>이메일</Label>
-          <Input value={email} onChange={(e) => setEmail(e.target.value)} />
-
+          <Input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="이메일을 입력하세요"
+          />
           <Label>비밀번호</Label>
           <Input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            placeholder="비밀번호를 입력하세요"
           />
         </LoginBox>
-
-        <LoginButton onClick={handleLogin}>로그인</LoginButton>
-      </LoginPage>
-
-      <BottomNav>
-  <NavItem>
-    <BiLogIn />
-    <span>로그인</span>
-  </NavItem>
-
-  <NavItem>
-    <BiMap />
-    <span>지도</span>
-  </NavItem>
-
-  <NavItem>
-    <BiUserCircle />
-    <span>보호자</span>
-  </NavItem>
-</BottomNav>
-    </Phone>
+        <Spacer />
+        <LoginButton onClick={handleLogin} disabled={loading}>
+          {loading ? '로그인 중...' : '로그인'}
+        </LoginButton>
+      </Content>
+      <BottomNavigation activePath="/login" />
+    </PageWrapper>
   );
 }
 
 export default Login;
 
-const Phone = styled.div`
-  width: 402px;
-  height: 100vh;
-  margin: 0 auto;
-  background: #ececec;
-  position: relative;
-  overflow: hidden;
-  font-family: "Pretendard", sans-serif;
-`;
-
-const TopBar = styled.header`
-  width: 402px;
-  height: 50px;
-  background: #48a111;
+const PageWrapper = styled.div`
   display: flex;
+  flex-direction: column;
+  min-height: 780px;
+
+  @media (max-width: 480px) {
+    min-height: 100vh;
+  }
+`;
+
+const Content = styled.main`
+  flex: 1;
+  background: #ececec;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  padding: 0 10px;
-  color: white;
-`;
-
-const BackButton = styled.button`
-  border: none;
-  background: white;
-  width: 28px;
-  height: 22px;
-  border-radius: 4px;
-  margin-right: 6px;
-  cursor: pointer;
-`;
-
-const Logo = styled.span`
-  font-size: 30px;
-  font-weight: 700;
-`;
-
-const LoginPage = styled.main`
-  padding-top: 20px;
+  padding: 28px 20px 20px;
+  overflow-y: auto;
 `;
 
 const LoginBox = styled.section`
-  width: 220px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: 300px;
   border: 2px solid #48a111;
   background: #ececec;
-  padding: 16px 10px;
+  padding: 20px 16px 6px;
   border-radius: 15px;
 `;
 
 const LoginTitle = styled.h1`
   text-align: center;
-  margin-top: 0;
-  margin-bottom: 24px;
+  margin: 0 0 22px;
   font-size: 30px;
   font-weight: 700;
+  color: #111;
 `;
 
 const Label = styled.label`
   display: block;
   margin-bottom: 6px;
-  font-size: 16px;
-  font-weight: 400;
+  font-size: 14px;
+  font-weight: 500;
+  color: #444;
 `;
 
 const Input = styled.input`
   width: 100%;
-  height: 32px;
+  height: 36px;
   border: 1px solid #ddd;
   border-radius: 8px;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
   padding: 0 10px;
   outline: none;
-  font-size: 18px;
+  font-size: 15px;
+  background: #fff;
+  box-sizing: border-box;
+  font-family: 'Pretendard', sans-serif;
 
   &:focus {
     border-color: #48a111;
   }
 `;
 
+const Spacer = styled.div`
+  flex: 1;
+  min-height: 16px;
+`;
+
 const LoginButton = styled.button`
-  width: 220px;
-  height: 40px;
+  width: 100%;
+  max-width: 300px;
+  height: 52px;
   background: #48a111;
-  color: white;
+  color: #fff;
   border: none;
   border-radius: 10px;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
+  font-family: 'Pretendard', sans-serif;
   cursor: pointer;
-  display: block;
-  margin: 307px auto 0;
-`;
-
-const BottomNav = styled.nav`
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 70px;
-  background: white;
-  border-top-left-radius: 24px;
-  border-top-right-radius: 24px;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-`;
-
-const NavItem = styled.div`
-  width: 33.3%;
-  height: 100%;
-  text-align: center;
-  font-size: 16px;
-  color: black;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-
-  svg {
-    font-size: 25px;
-    color: #48a111;
-  }
+  margin-bottom: 16px;
+  flex-shrink: 0;
+  opacity: ${(p) => (p.disabled ? 0.6 : 1)};
 `;

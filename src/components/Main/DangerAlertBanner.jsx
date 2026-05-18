@@ -1,21 +1,33 @@
 import styled from 'styled-components';
 import { PiSiren } from 'react-icons/pi';
+import { calcDistance } from '../../api/api';
 
-const ALERTS = [
-  '100m 전방에 사고 다발 구간',
-  '50m 전방에 사고 다발 구간',
-];
+const DEFAULT_LAT = 37.3375;
+const DEFAULT_LNG = 127.264;
 
-const DangerAlertBanner = () => (
-  <BannerList>
-    {ALERTS.map((text) => (
-      <BannerItem key={text}>
-        <PiSiren size={26} color="#ff0000" />
-        <BannerText>{text}</BannerText>
-      </BannerItem>
-    ))}
-  </BannerList>
-);
+const FALLBACK_ALERTS = ['100m 전방에 사고 다발 구간', '50m 전방에 사고 다발 구간'];
+
+const DangerAlertBanner = ({ zones = [], lat = DEFAULT_LAT, lng = DEFAULT_LNG }) => {
+  const alerts =
+    zones.length > 0
+      ? zones.slice(0, 2).map((z) => {
+          const dist = calcDistance(lat, lng, z.latitude, z.longitude);
+          const label = z.zoneName || '사고 다발 구간';
+          return dist < 10 ? `반경 ${z.radius}m 내 ${label}` : `${dist}m 전방에 ${label}`;
+        })
+      : FALLBACK_ALERTS;
+
+  return (
+    <BannerList>
+      {alerts.map((text) => (
+        <BannerItem key={text}>
+          <PiSiren size={26} color="#ff0000" />
+          <BannerText>{text}</BannerText>
+        </BannerItem>
+      ))}
+    </BannerList>
+  );
+};
 
 export default DangerAlertBanner;
 

@@ -1,14 +1,13 @@
 import styled from 'styled-components';
 
-const BriefingCard = () => (
+const FALLBACK =
+  '오늘 오후 6시 이후에는 한국외대 정문 앞 횡단보도와 버스정류장 주변의 보행 위험도가 높습니다. 야간 사고 이력이 있는 구간이므로 밝은 길을 이용하고, 횡단 전 좌우를 확인해 주세요';
+
+const BriefingCard = ({ text = '' }) => (
   <CardWrapper>
     <Title>AI 보행 위험 브리핑</Title>
     <ContentBox>
-      <ContentText>
-        오늘 오후 6시 이후에는 한국외대 정문 앞 횡단보도와 버스정류장 주변의 보행 위험도가
-        높습니다. 야간 사고 이력이 있는 구간이므로 밝은 길을 이용하고, 횡단 전 좌우를 확인해
-        주세요
-      </ContentText>
+      <ContentText>{text || FALLBACK}</ContentText>
     </ContentBox>
   </CardWrapper>
 );
