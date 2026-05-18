@@ -6,7 +6,9 @@ const DEFAULT_LNG = 127.264;
 
 const MapSection = ({ zones = [], lat = DEFAULT_LAT, lng = DEFAULT_LNG }) => {
   const containerRef = useRef(null);
+  const mapRef = useRef(null);
 
+  // 지도 초기화 — lat/lng 변경 시에만
   useEffect(() => {
     if (!window.kakao || !containerRef.current) return;
 
@@ -15,10 +17,17 @@ const MapSection = ({ zones = [], lat = DEFAULT_LAT, lng = DEFAULT_LNG }) => {
       center,
       level: 4,
     });
+    mapRef.current = map;
 
-    // Default marker
-    const marker = new window.kakao.maps.Marker({ position: center });
-    marker.setMap(map);
+    new window.kakao.maps.Marker({ position: center }).setMap(map);
+  }, [lat, lng]);
+
+  // 위험구간 오버레이 — zones 변경 시
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !window.kakao) return;
+
+    const center = new window.kakao.maps.LatLng(lat, lng);
 
     if (zones.length > 0) {
       zones.forEach((zone) => {
@@ -34,13 +43,7 @@ const MapSection = ({ zones = [], lat = DEFAULT_LAT, lng = DEFAULT_LNG }) => {
         });
       });
     } else {
-      // Fallback: concentric hazard rings at center
-      [
-        [200, 0.06],
-        [150, 0.13],
-        [100, 0.22],
-        [60, 0.40],
-      ].forEach(([radius, fillOpacity]) => {
+      [[200, 0.06], [150, 0.13], [100, 0.22], [60, 0.4]].forEach(([radius, fillOpacity]) => {
         new window.kakao.maps.Circle({
           map,
           center,
@@ -53,7 +56,7 @@ const MapSection = ({ zones = [], lat = DEFAULT_LAT, lng = DEFAULT_LNG }) => {
         });
       });
     }
-  }, [zones, lat, lng]);
+  }, [zones]);
 
   return <MapContainer ref={containerRef} />;
 };
@@ -61,6 +64,7 @@ const MapSection = ({ zones = [], lat = DEFAULT_LAT, lng = DEFAULT_LNG }) => {
 export default MapSection;
 
 const MapContainer = styled.div`
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
 `;
